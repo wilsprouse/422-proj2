@@ -1,12 +1,15 @@
+
 class Site:
-    def __init__(self, totalRows, totalColumns):
-        isOpen = True
-        isClosed = False
-        #letter =
+    def init(self, totalRows, totalColumns):
+        isAvailable = True
+        isBlack = False
+        isOccupied = False
+        letter = None
         HorizThPositionInWord = 0
         VertThPositionInWord = 0
         row = 0
         column = 0
+        overallPosition = 0
 
     def setPointers(self, totalRows, totalColumns):
     #relate site to up, down, left, and right sites
@@ -33,15 +36,12 @@ class Site:
             self.right.column = self.column +1
             self.right.row = self.row
         else:self.right = None
-
-
+""""""
 class Grid:
-    def __init__(self, totalRows, totalColumns):
-        for i in range (0, totalRows):
-            for j in range (0, totalColumns):
-            Site().column = j
-        Site().row = i
-
-
-
+    def init(self, totalRows, totalColumns):
+        for i in range(0, totalRows):
+            for j in range(0, totalColumns):
+                Site().column = j
+                Site.overallPosition = (i * totalColumns) + j
+            Site().row = i
 
