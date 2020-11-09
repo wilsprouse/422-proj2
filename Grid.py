@@ -1,61 +1,14 @@
-"""
-class Site:
-    def __init__(self, totalRows, totalColumns):
-        isOpen = True
-        isClosed = False
-        letter = 0x3FFFFFF # 26
-        HorizThPositionInWord = 0
-        VertThPositionInWord = 0
-        row = 0
-        column = 0
-
-    def setPointers(self, totalRows, totalColumns):
-    #relate site to up, down, left, and right sites
-        #relate to immediately-above site
-        if self.row> 0:
-            self.up.row = self.row-1
-            self.up.column =self.column
-        else: self.up = None
-
-        #relate to immediately-below site
-        if self.row <totalRows-1:
-            self.down.row = self.row+1
-            self.down.column = self.column
-        else: self.down = None
-
-        #relate to immediately-left site
-        if self.column > 0:
-            self.left.column = self.column -1
-            self.left.row = self.row
-        else: self.left = None
-
-        #relate to immediately-right site
-        if self.column < totalColumns -1:
-            self.right.column = self.column +1
-            self.right.row = self.row
-        else:self.right = None
-
-
-class Grid:
-    def __init__(self, totalRows, totalColumns):
-        for i in range (0, totalRows):
-            for j in range (0, totalColumns):
-                Site().column = j
-            Site().row = i
-"""
-
-
 class Cell:
-    ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+    ALPHABET = 'abcdefghijklmnopqrstuvwxyz\0'   # alphabet + wall character
 
     def __init__(self):
         self.__value = 0
-        for i in range(len(Cell.alphabet)):
-            self.__value = (self.__value << 1) & 1
+        for i in range(len(Cell.ALPHABET)):
+            self.__value = (self.__value << 1) + 1
 
     # MUTATORS
 
-    def __set__(self, instance, value):
+    def set(self, value):
         """
         Mutator method for Cell state (used like cell = value). Sets cell possibilities to a specific state through the input value "value."
         :param instance: Not used (required for __set__ method)
@@ -71,7 +24,7 @@ class Cell:
 
     def __setitem__(self, key: str, value: bool):
         """
-        Mutator method for an element in cell (used like cell[key] = value). Sets the possibility state of the given character "key" to "value."
+        Mutator method for an element in cell (used like cell[key] = value). Sets the character state of the given character "key" to "value."
         :param key: A one character string
         :param value: Whether the character is possible or not
         :return: None
@@ -79,15 +32,28 @@ class Cell:
         pos = self.__get_index(key)
         if pos == None:
             raise TypeError('Key correctly formatted but does not exist in alphabet.')
-        self.__value = self.__value & (int(value) << pos)
+        if value:
+            self.__value |= 1 << pos
+        else:
+            self.__value &= ~(1 << pos)
 
     # ACCESSORS
 
-    def __get__(self, instance, owner):
+    def isChosen(self):
+        tmp = self.toList()
+        if len(tmp) != 1:
+            return False
+        return True
+
+    def getChosen(self):
+        tmp = self.toList()
+        if len(tmp) != 1:
+            return None
+        return tmp[0]
+
+    def getValues(self):
         """
         Accessor method for Cell state (used like tmp = cell, etc.). Get's the integer representation of the Cell's state.
-        :param instance: Not used
-        :param owner: Not used
         :return: int
         """
         return self.__value
@@ -98,7 +64,7 @@ class Cell:
         :param item: Single character string
         :return: bool
         """
-        pos = self.__get_index(item)
+        pos = self.__get_index(item) # pos in alphabet
         if pos == None:
             raise TypeError('Key correctly formatted but does not exist in alphabet.')
         return 1 & (self.__value >> pos) == 1
@@ -107,7 +73,7 @@ class Cell:
 
     def __len__(self):
         """Gets number of possible characters."""
-        return len(Cell.alphabet)
+        return len(Cell.ALPHABET)
 
     def __contains__(self, item):
         """
@@ -122,7 +88,7 @@ class Cell:
         Iterator method for Cell class (used in for loops). iterates through all possible letters
         :return: char (returned through yield)
         """
-        for char in repr(self):
+        for char in self.toList():
             yield char
 
 
@@ -133,21 +99,25 @@ class Cell:
         Converts cell to string. Returns character only if there is one possible character left, otherwise an emp
         :return: str
         """
-        tmp = repr(self)
+        tmp = self.toList()
         if len(tmp) == 1:
             return tmp[0]
         return '?'
 
-
     def __repr__(self):
+        return str(self)
+
+
+    def toList(self):
         """
         Get representation of Cell. Returns list of one character strings representing each possible character.
         :return: list
         """
         ret = []
         for pos in range(len(self)):
-            if pos in self:
-                ret += Cell.ALPHABET[pos]
+            tmp = Cell.ALPHABET[pos]
+            if tmp in self:
+                ret.append(tmp)
         return ret
 
     # HELPERS
@@ -158,9 +128,9 @@ class Cell:
         :param char: str
         :return: int
         """
-        if len(char) != 1:
+        if type(char) is not str or len(char) != 1:
             raise TypeError('Accesses must be a string of size one.')
-        return Grid.ALPHABET.find(char)
+        return Cell.ALPHABET.find(char.lower())
 
 
 class Grid:
@@ -200,14 +170,16 @@ class Grid:
         """
         x, y = key
         if x != None and y != None:
-            self.__grid[x][y][value.lower()] = True
+            self.__grid[x][y].set(value.lower())
         else:
             if y == None:
                 for i in range(self.rows):
-                    self.__grid[x][i][value[i].lower()] = True
+                    self.__grid[x][i].set(value[i].lower())
             else:
                 for i in range(self.cols):
-                    self.__grid[i][y][value[i].lower()] = True
+                    self.__grid[i][y].set(value[i].lower())
+
+    # TODO: add special grid accessors and viewers making sure it copies the grid each time
 
     def __str__(self):
         """
@@ -242,15 +214,47 @@ def __test_grid():
             ['t', 'o']]
     for row in range(len(test)):
         for col in range(len(test[0])):
-            grid[row, col] = test[row][col]
+            grid[row, col].set(test[row][col])
     print("Testing accessors:")
     print(f" - Test grid:\n{grid}")
+    print(f" - Test pos: {grid[0,0]}")
     print(f" - Test row: {grid[0, None]}")
     print(f" - Test col: {grid[None, 0]}")
     print("Testing mutators:")
     grid[0, None] = ['p', 'p']
-    print(f" - Test add row\n{grid}.")
+    print(f" - Test add row\n{grid}")
+    grid[None, 1] = ['l', 'p']
+    print(f" - Test add col\n{grid}")
+
+
+def __cell_test():
+    cell = Cell()
+    print("====================\ntest create\n====================")
+    print(f"{bin(cell.getValues())}\n{cell.toList()}")
+    print("====================\ntest edit bit\n====================")
+    cell["b"] = False
+    cell["P"] = False
+    print(f"{bin(cell.getValues())}\n{cell.toList()}")
+    store = cell.getValues()
+    print("====================\ntest get bit\n====================")
+    print(cell["p"])
+    print(cell["d"])
+    print(f"{bin(cell.getValues())}\n{cell.toList()}")
+    print("====================\ntest set\n====================")
+    cell.set('f')
+    print(f"{bin(cell.getValues())}\n{cell.toList()}")
+    print("====================\ntest string\n====================")
+    print(f"{cell}")
+    print("====================\ntest iterate\n====================")
+    cell.set(store)
+    for char in cell:
+        print(char, end=' ')
+    print()
+
+
+
 
 
 if __name__ == '__main__':
     __test_grid()
+    #__cell_test()
