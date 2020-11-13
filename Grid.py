@@ -1,10 +1,14 @@
+
+import math
 class Cell:
     ALPHABET = 'abcdefghijklmnopqrstuvwxyz\0'   # alphabet + wall character
 
-    def __init__(self):
+    def __init__(self, value = None):
         self.__value = 0
         for i in range(len(Cell.ALPHABET)):
             self.__value = (self.__value << 1) + 1
+        if value != None:
+            self.set(value)
 
     # MUTATORS
 
@@ -40,16 +44,14 @@ class Cell:
     # ACCESSORS
 
     def isChosen(self):
-        tmp = self.toList()
-        if len(tmp) != 1:
-            return False
-        return True
+        tmp = math.log2(self.__value)
+        return int(tmp) == tmp
 
     def getChosen(self):
-        tmp = self.toList()
-        if len(tmp) != 1:
+        tmp = math.log2(self.__value)
+        if int(tmp) != tmp:
             return None
-        return tmp[0]
+        return Cell.ALPHABET[int(tmp)]
 
     def getValues(self):
         """
@@ -99,10 +101,10 @@ class Cell:
         Converts cell to string. Returns character only if there is one possible character left, otherwise an emp
         :return: str
         """
-        tmp = self.toList()
-        if len(tmp) == 1:
-            return tmp[0]
-        return '?'
+        tmp = self.getChosen()
+        if tmp == None:
+            return '?'
+        return tmp
 
     def __repr__(self):
         return str(self)
@@ -251,10 +253,70 @@ def __cell_test():
         print(char, end=' ')
     print()
 
+"""
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+TUTORIAL
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+"""
+def cell_tutorial():
+    undecided_cell = Cell("abdlmp")
+    decided_cell = Cell("z")
+    """
+    --------------------
+    Accessing a cell:
+    --------------------
+    """
+    "Checking if a letter is possible"
+    # To check if a cell is possible there are 2 methods you can use:
+    # 1. index (i.e. cell[])
+    print(undecided_cell['a'])      # prints true
+    print(undecided_cell['x'])      # prints false
+    print(decided_cell['z'])        # prints true
+    # 2. 'in' statement
+    print('a' in undecided_cell)    # prints true
+    print('x' in undecided_cell)    # prints false
+    print('z' in decided_cell)      # prints true
+    "Iterating through possible letters"
+    # If you'd like to check all possible letters place the cell in a for loop
+    for char in undecided_cell:
+        print(char, end='\t') # prints 'a   b   d   l   m   p'
+    print()
+    "Checking if a letter is the only possible letter"
+    # The cell class also has a few methods to see if a letter has been decided (i.e. there's only 1 possibility)
+    # 1. isChosen() - tests whether the cell has been decided
+    print(undecided_cell.isChosen())    # prints false
+    print(decided_cell.isChosen())      # prints true
+    # 2. getChosen() - returns decided character
+    print(undecided_cell.getChosen())   # prints None
+    print(decided_cell.getChosen())     # prints 'z'
+    """
+    --------------------
+    Editing a cell:
+    --------------------
+    """
+    "Setting multiple letters"
+    # U can set multiple values using the set() command which takes either a string of possible characters or a integer representation as an input
+    undecided_cell.set("mpwqr")                         # Sets characters 'm', 'p', 'q', 'r', 'w' to true and the rest false
+                       # ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    undecided_cell.set(0b00001001000100100000000000)    # Sets characters 'e', 'h', 'l', 'o' to true and the rest false
+    "Setting 1 letter"
+    # To set a specific letter index the letter like in a dictionary and set it to a boolean
+    undecided_cell['v'] = True  # Sets v to true
+    undecided_cell['l'] = False # Sets l to false
+    """
+    --------------------
+    Printing a cell:
+    --------------------
+    """
+    "Print possible characters"
+    print(undecided_cell.toList())
+    "Print decided characters"
+    print(str(decided_cell))
 
 
 
 
 if __name__ == '__main__':
-    __test_grid()
+    #__test_grid()
     #__cell_test()
+    cell_tutorial()
