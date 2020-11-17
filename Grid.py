@@ -1,9 +1,12 @@
-
+import copy
 import math
-class Cell:
-    ALPHABET = 'abcdefghijklmnopqrstuvwxyz\0'   # alphabet + wall character
 
-    def __init__(self, value = None):
+
+class Cell:
+    WALL_CHAR = '#'
+    ALPHABET = 'abcdefghijklmnopqrstuvwxyz' + WALL_CHAR  # alphabet + wall character
+
+    def __init__(self, value=None):
         self.__value = 0
         for i in range(len(Cell.ALPHABET)):
             self.__value = (self.__value << 1) + 1
@@ -12,7 +15,7 @@ class Cell:
 
     # MUTATORS
 
-    def set(self, value):
+    def __set(self, value):
         """
         Mutator method for Cell state (used like cell = value). Sets cell possibilities to a specific state through the input value "value."
         :param instance: Not used (required for __set__ method)
@@ -41,13 +44,46 @@ class Cell:
         else:
             self.__value &= ~(1 << pos)
 
+    def __copy__(self):
+        """
+        Copy value into a new cell
+        """
+        return Cell(self.__value)
+
+    def __deepcopy__(self, memodict={}):
+        """
+        Copy both the class and the values in the class (will not share any data)
+        """
+        tmp = copy.deepcopy(self.__value)
+        return Cell(tmp)
+
+    def __and__(self, other):
+        """Bitwise and operator (does the same)"""
+        return Cell(self.__value & other.getValues())
+
+    def __or__(self, other):
+        """Bitwise or operator (does the same)"""
+        return Cell(self.__value | other.getValues())
+
+    def __xor__(self, other):
+        """Bitwise xor (does the same)"""
+        return Cell(self.__value ^ other.getValues())
+
+    def __invert__(self):
+        """Bitwise not, inverts the cell (copying the data)"""
+        return Cell(~self.__value)
+
     # ACCESSORS
 
     def isChosen(self):
+        if self.__value == 0:
+            return False
         tmp = math.log2(self.__value)
         return int(tmp) == tmp
 
     def getChosen(self):
+        if self.__value == 0:
+            return None
         tmp = math.log2(self.__value)
         if int(tmp) != tmp:
             return None
@@ -66,7 +102,7 @@ class Cell:
         :param item: Single character string
         :return: bool
         """
-        pos = self.__get_index(item) # pos in alphabet
+        pos = self.__get_index(item)  # pos in alphabet
         if pos == None:
             raise TypeError('Key correctly formatted but does not exist in alphabet.')
         return 1 & (self.__value >> pos) == 1
@@ -93,7 +129,6 @@ class Cell:
         for char in self.toList():
             yield char
 
-
     # CONVERTERS
 
     def __str__(self):
@@ -108,7 +143,6 @@ class Cell:
 
     def __repr__(self):
         return str(self)
-
 
     def toList(self):
         """
@@ -132,7 +166,13 @@ class Cell:
         """
         if type(char) is not str or len(char) != 1:
             raise TypeError('Accesses must be a string of size one.')
-        return Cell.ALPHABET.find(char.lower())
+        pos = Cell.ALPHABET.find(char.lower())
+        if pos < 0:
+            raise TypeError(f'Access must be in alphabet ({Cell.ALPHABET[:-1]})')
+        return pos
+
+
+CELL_WALL = Cell(Cell.WALL_CHAR)
 
 
 class Grid:
@@ -219,7 +259,7 @@ def __test_grid():
             grid[row, col].set(test[row][col])
     print("Testing accessors:")
     print(f" - Test grid:\n{grid}")
-    print(f" - Test pos: {grid[0,0]}")
+    print(f" - Test pos: {grid[0, 0]}")
     print(f" - Test row: {grid[0, None]}")
     print(f" - Test col: {grid[None, 0]}")
     print("Testing mutators:")
@@ -253,11 +293,14 @@ def __cell_test():
         print(char, end=' ')
     print()
 
+
 """
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 TUTORIAL
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
+
+
 def cell_tutorial():
     undecided_cell = Cell("abdlmp")
     decided_cell = Cell("z")
@@ -269,26 +312,26 @@ def cell_tutorial():
     "Checking if a letter is possible"
     # To check if a cell is possible there are 2 methods you can use:
     # 1. index (i.e. cell[])
-    print(undecided_cell['a'])      # prints true
-    print(undecided_cell['x'])      # prints false
-    print(decided_cell['z'])        # prints true
+    print(undecided_cell['a'])  # prints true
+    print(undecided_cell['x'])  # prints false
+    print(decided_cell['z'])  # prints true
     # 2. 'in' statement
-    print('a' in undecided_cell)    # prints true
-    print('x' in undecided_cell)    # prints false
-    print('z' in decided_cell)      # prints true
+    print('a' in undecided_cell)  # prints true
+    print('x' in undecided_cell)  # prints false
+    print('z' in decided_cell)  # prints true
     "Iterating through possible letters"
     # If you'd like to check all possible letters place the cell in a for loop
     for char in undecided_cell:
-        print(char, end='\t') # prints 'a   b   d   l   m   p'
+        print(char, end='\t')  # prints 'a   b   d   l   m   p'
     print()
     "Checking if a letter is the only possible letter"
     # The cell class also has a few methods to see if a letter has been decided (i.e. there's only 1 possibility)
     # 1. isChosen() - tests whether the cell has been decided
-    print(undecided_cell.isChosen())    # prints false
-    print(decided_cell.isChosen())      # prints true
+    print(undecided_cell.isChosen())  # prints false
+    print(decided_cell.isChosen())  # prints true
     # 2. getChosen() - returns decided character
-    print(undecided_cell.getChosen())   # prints None
-    print(decided_cell.getChosen())     # prints 'z'
+    print(undecided_cell.getChosen())  # prints None
+    print(decided_cell.getChosen())  # prints 'z'
     """
     --------------------
     Editing a cell:
@@ -296,13 +339,13 @@ def cell_tutorial():
     """
     "Setting multiple letters"
     # U can set multiple values using the set() command which takes either a string of possible characters or a integer representation as an input
-    undecided_cell.set("mpwqr")                         # Sets characters 'm', 'p', 'q', 'r', 'w' to true and the rest false
-                       # ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    undecided_cell.set(0b00001001000100100000000000)    # Sets characters 'e', 'h', 'l', 'o' to true and the rest false
+    undecided_cell.set("mpwqr")  # Sets characters 'm', 'p', 'q', 'r', 'w' to true and the rest false
+    # ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    undecided_cell.set(0b00001001000100100000000000)  # Sets characters 'e', 'h', 'l', 'o' to true and the rest false
     "Setting 1 letter"
     # To set a specific letter index the letter like in a dictionary and set it to a boolean
     undecided_cell['v'] = True  # Sets v to true
-    undecided_cell['l'] = False # Sets l to false
+    undecided_cell['l'] = False  # Sets l to false
     """
     --------------------
     Printing a cell:
@@ -314,9 +357,7 @@ def cell_tutorial():
     print(str(decided_cell))
 
 
-
-
 if __name__ == '__main__':
-    #__test_grid()
-    #__cell_test()
+    # __test_grid()
+    # __cell_test()
     cell_tutorial()
