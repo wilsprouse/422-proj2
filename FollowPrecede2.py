@@ -86,10 +86,10 @@ def shutOffHorizontalPrecede(row, column, letter):
     toBeShutOff = assignPreShutOffs(letter)
     if toBeShutOff is not None:
         for letter in assignPostShutOffs():
-            [row][column+1].setitem(letter, False)
+            [row][column-1].setitem(letter, False)
 
 def shutOffVerticalPrecede(row, column, letter):
     toBeShutOff = assignPreShutOffs(letter)
     if toBeShutOff is not None:
         for letter in assignPostShutOffs():
-            [row+1][column].setitem(letter, False)
+            [row-1][column].setitem(letter, False)
