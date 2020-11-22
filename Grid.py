@@ -1,5 +1,7 @@
 import copy
 import math
+import WordFinder
+from ErrorChecker import shutOffLeftRight, shutOffAboveBelow
 
 
 class Cell:
@@ -15,7 +17,7 @@ class Cell:
 
     # MUTATORS
 
-    def __set(self, value):
+    def set(self, value):
         """
         Mutator method for Cell state (used like cell = value). Sets cell possibilities to a specific state through the input value "value."
         :param instance: Not used (required for __set__ method)
@@ -54,8 +56,7 @@ class Cell:
         """
         Copy both the class and the values in the class (will not share any data)
         """
-        tmp = copy.deepcopy(self.__value)
-        return Cell(tmp)
+        return Cell(copy.deepcopy(self.__value, memodict))
 
     def __and__(self, other):
         """Bitwise and operator (does the same)"""
@@ -106,6 +107,10 @@ class Cell:
         if pos == None:
             raise TypeError('Key correctly formatted but does not exist in alphabet.')
         return 1 & (self.__value >> pos) == 1
+
+    def __eq__(self, other):
+        assert type(other) is Cell
+        return self.__value == other.getValues()
 
     # ITERATORS
 
@@ -180,46 +185,29 @@ class Grid:
         self.rows = totalRows
         self.cols = totalColumns
         self.__grid = []
-        for x in range(totalRows):
+        for row in range(totalRows):
             self.__grid.append([])
-            for y in range(totalColumns):
-                self.__grid[x].append(Cell())
+            for col in range(totalColumns):
+                self.__grid[row].append(Cell())
 
     def __getitem__(self, key: tuple):
         """
-        Accessor method for index in Grid class (used like grid[key]). Taking in the x, y pair "key", will return either a row/col vector if either x or y is set to None or a specific cell if both are given.
-        :param key: Index value as an x, y pair. If one of the values is set to None return whole row (x) or column(y).
+        Accessor method for index in Grid class (used like grid[key]). Taking in the row, y pair "key", will return either a row/col vector if either row or y is set to None or a specific cell if both are given.
+        :param key: Index value as an row, y pair. If one of the values is set to None return whole row (x) or column(y).
         :return: A list of type Cell or a single Cell object
         """
-        x, y = key
-        if x != None and y != None:
-            return self.__grid[x][y]
-        else:
-            if y == None:
-                return self.__grid[x]
-            else:
-                ret = []
-                for i in range(self.cols):
-                    ret.append(self.__grid[i][y])
-                return ret
+        row, col = key
+        return self.__grid[row][col]
 
     def __setitem__(self, key, value):
         """
         Mutator method for index in Grid class (used like grid[key] = value).
-        :param key: Index value as an x, y pair. If one of the values is set to None will set the whole row (y) or column(x)
+        :param key: Index value as an row, y pair. If one of the values is set to None will set the whole row (y) or column(x)
         :param value: Value the index at key will be set to. Must be a Cell type if accessing point or list of Cell if accessing row/col.
         :return: None
         """
-        x, y = key
-        if x != None and y != None:
-            self.__grid[x][y].set(value.lower())
-        else:
-            if y == None:
-                for i in range(self.rows):
-                    self.__grid[x][i].set(value[i].lower())
-            else:
-                for i in range(self.cols):
-                    self.__grid[i][y].set(value[i].lower())
+        row, col = key
+        self.__grid[row][col] = value
 
     # TODO: add special grid accessors and viewers making sure it copies the grid each time
 
@@ -229,14 +217,35 @@ class Grid:
         :return: str
         """
         ret = ''
-        line = '+-+' * self.rows + '\n'
-        for row in self.__grid:
+        line = '+-' * self.cols + '+\n'
+        for row in range(self.rows):
             ret += line
-            for cell in row:
-                ret += f'|{cell}|'
-            ret += '\n'
+            for col in range(self.cols):
+                ret += f'|{self[row,col]}'
+            ret += '|\n'
         ret += line
         return ret
+
+    def __eq__(self, other):
+        assert type(other) is Grid
+        if self.rows != other.rows or self.cols != other.cols:
+            return False
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self[row, col] != other[row, col]:
+                    return False
+        return True
+
+    def __copy__(self):
+        newGrid = Grid(self.rows, self.cols)
+        for i in range(len(self.__grid)):
+            newGrid.__grid[i] = copy.copy(self.__grid[i])
+        return newGrid
+
+    def __deepcopy__(self, memodict={}):
+        newGrid = Grid(self.rows, self.cols)
+        newGrid.__grid = copy.deepcopy(self.__grid, memodict)
+        return newGrid
 
     def toDict(self):
         """
@@ -244,10 +253,115 @@ class Grid:
         :return: dict
         """
         ret = dict()
-        for x in range(len(self.__grid)):
-            for y in range(len(self.__grid)):
-                ret[x, y] = self.__grid[x][y]
+        for row in range(len(self.__grid)):
+            for col in range(len(self.__grid)):
+                ret[row, col] = self.__grid[row][col]
         return ret
+
+    def isComplete(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if not self[row, col].isChosen():  # If cell has not been chosen
+                    return False
+        return True
+
+    def isValid(self, dictionary):
+        #print('hi')
+        for _, location in self.__getNextAdditionPoints():
+            #print(f'checking {location}')
+            if not dictionary.isWord(location):
+                #print('Not good')
+                return False
+            #print('succeeded')
+        return True
+
+    def getNextGridStates(self, dictionary):
+        """
+        Creates successor grid states based on current state by...
+            - Finding where to input subsequent words (Row / Col Chooser)
+            - Inserting all possible words into that point as separate substates (WordFinder)
+            - Return these states
+        """
+        ret = []
+        for metadata, location in self.__getNextAdditionPoints(lambda list : not all([cell.isChosen() for cell in list])):
+            startRow, startCol, direction = metadata
+            words = dictionary.getWords(location)
+            for word in words:
+                new_grid = copy.deepcopy(self)
+                if direction == 'Horizontal':
+                    iterate = lambda point : (point[0], point[1] + 1) # Horizontal iterator
+                elif direction == 'Vertical':
+                    iterate = lambda point : (point[0] + 1, point[1]) # Vertical iterator
+                else:
+                    raise Exception('Failed both directions')
+
+                #print(f'Adding {word} {direction}ly to grid:\n{str(self)}')
+                point = startRow, startCol
+                for cell in word:
+                    #print(f'Adding {cell} to point {point}', end='\t')
+                    new_grid[point] = cell
+                    if direction == 'Vertical':
+                        shutOffLeftRight(self, point)
+                    elif direction == 'Horizontal':
+                        shutOffAboveBelow(self, point)
+                    else:
+                        raise Exception('Failed both directions')
+                    point = iterate(point)
+                #print()
+                #print(f'Added {word} to grid:\n{str(self)}')
+                #print(str(new_grid))
+                #print(new_grid[])
+                ret.append(new_grid)
+        return ret
+
+    def __getNextAdditionPoints(self, requirements=lambda list :True):
+        pos_left = []
+        col = 0
+        while col < self.cols:
+            row = 0
+            while row < self.rows:
+                if self[row, col] != CELL_WALL:
+                    save_row = row
+                    pos = []
+                    #alreadyComplete = True
+                    while self[row, col] != CELL_WALL:
+                        #tmp = self[row, col]
+                        #if not tmp.isChosen():
+                        #    alreadyComplete = False
+                        pos.append(self[row, col])
+                        row += 1
+                        if row == self.cols:
+                            break
+                    #if len(pos) != 1 and not alreadyComplete:
+                    #print(f'{[cell.isChosen() for cell in pos]} -> {requirements(pos)}')
+                    if len(pos) != 1 and requirements(pos):
+                        pos_left.append(((save_row, col, 'Vertical'), pos))
+                row += 1
+            col += 1
+
+
+        row = 0
+        while row < self.rows:
+            col = 0
+            while col < self.cols:
+                if self[row, col] != CELL_WALL:
+                    pos = []
+                    save_col = col
+                    #alreadyComplete = True
+                    while self[row, col] != CELL_WALL:
+                        tmp = self[row, col]
+                        #if not tmp.isChosen():
+                        #    alreadyComplete = False
+                        pos.append(tmp)
+                        col += 1
+                        if col == self.cols:
+                            break
+                    #if len(pos) != 1 and not alreadyComplete:
+                    if len(pos) != 1 and requirements(pos):
+                        pos_left.append(((row, save_col, 'Horizontal'), pos))
+                col += 1
+            row += 1
+        return pos_left
 
 
 def __test_grid():
@@ -292,6 +406,54 @@ def __cell_test():
     for char in cell:
         print(char, end=' ')
     print()
+
+
+def __test_getNext():
+    dictionary = WordFinder.WordFinder()
+    dictionary.importFromFile('dictionary.new.txt')
+
+    grid = Grid(2, 2)
+    test_grid = [
+        ['a', 't'],
+        [None, '#']
+    ]
+    for y in range(len(test_grid)):
+        for x in range(len(test_grid[0])):
+            cell = test_grid[x][y]
+            if cell != None:
+                grid[x, y] = Cell(cell)
+
+    print(str(grid))
+    print('---------------------')
+    # for i in range(5):
+    #    grid[random.randint(0,grid.rows - 1), random.randint(0,grid.cols - 1)] = Cell.WALL_CHAR
+    # print(str(grid))
+    test = grid.getNextGridStates(dictionary)
+
+    for grid in test:
+        print(str(grid))
+
+def __test_getNextAdditionPoints():
+    grid = Grid(4, 4)
+    test_grid = [
+        ['h', 'e', 'a', 'd'],
+        ['e', 'v', 'e', 'r'],
+        [None, '#', '#', '#'],
+        [None, None, None, None]
+    ]
+    for y in range(len(test_grid)):
+        for x in range(len(test_grid[0])):
+            cell = test_grid[x][y]
+            if cell != None:
+                grid[x, y] = Cell(cell)
+    print('testing for getNext')
+    test = grid.getNextAdditionPoints(lambda list : not all([cell.isChosen() for cell in list]))
+    for cell in test:
+        print(cell)
+    print('testing for isComplete')
+    test = grid.getNextAdditionPoints()
+    for cell in test:
+        print(cell)
 
 
 """
@@ -360,4 +522,7 @@ def cell_tutorial():
 if __name__ == '__main__':
     # __test_grid()
     # __cell_test()
-    cell_tutorial()
+    # cell_tutorial()
+    __test_getNext()
+    # __test_getNextAdditionPoints()
+    # __testGridCopy()

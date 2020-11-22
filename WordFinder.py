@@ -1,5 +1,5 @@
 import re
-from Grid import *
+import Grid
 import util
 import copy
 import json
@@ -20,7 +20,7 @@ class WordFinder:
         """
         fp = open(filepath, 'r')
         for word in fp:
-            print(word)
+            #print(word)
             self.addWord(word[:-1])
         fp.close()
 
@@ -49,34 +49,44 @@ class WordFinder:
             else: # if the word is not complete, load sub-dictionary.
                 dictionaryLevel = dictionaryLevel[char]['letters']
 
+    def isWord(self, line):
+        assert all([cell.isChosen() for cell in line])
+        dictionaryLevel = self.__dict
+
+        for index in range(len(line)):
+            char = line[index].getChosen()
+            if char not in dictionaryLevel:
+                return False
+            else:
+                dictionaryLevel = dictionaryLevel[char]['letters']
+        return True
+
     def getWords(self, line):
         ret = []
         for start in range(len(line) - 1): # Start at all points except the last one (will not be adding one letter words)
             states = util.Queue()
             stateLine = line
             if start > 0: # if not adding to beginning of line, add wall character to start of word
-                stateLine = line.copy() # copy line so original not changed
-                stateLine[start - 1] = CELL_WALL
+                if stateLine[start - 1].isChosen():
+                    continue
+                stateLine = copy.copy(line) # copy line so original not changed
+                stateLine[start - 1] = Grid.CELL_WALL
             states.push((stateLine, start, self.__dict)) #insert starting state to queue. Values are line state, position in line, and dictionary level.
 
             while not states.isEmpty():
                 currLine, pos, dictionaryLevel = states.pop()
-                #if pos != 0:
-                #    print(f"{'  ' * pos}{currLine[pos - 1]} -> {id(dictionaryLevel)}")
-                #else:
-                #    print(f"{'  ' * pos}head -> {id(dictionaryLevel)}")
-
                 if pos >= len(line):
                     continue
 
                 for validChar in line[pos]:
                     if validChar in dictionaryLevel:
-                        newLine = currLine.copy()
-                        newLine[pos] = Cell(validChar)
+                        newLine = copy.copy(currLine)
+                        newLine[pos] = Grid.Cell(validChar)
 
                         if dictionaryLevel[validChar]['isComplete']:
+                            #foundWord
                             if pos + 1 < len(newLine): # if pos + 1 in line (no IndexError)
-                                newLine[pos + 1] = CELL_WALL
+                                newLine[pos + 1] = Grid.CELL_WALL
                             ret.append(newLine)
 
                         states.push((newLine, pos + 1, dictionaryLevel[validChar]['letters']))
@@ -129,9 +139,17 @@ def __printLevel(dictionaryLevel, depth):
             print()
         printLevel(dictionaryLevel[char]['letters'], depth + 1)
 
+def __testIsWord():
+    dictionary = WordFinder()
+    dictionary.importFromList(['apple', 'notapple'])
+    test = [Grid.Cell('a'), Grid.Cell('p'), Grid.Cell('p'), Grid.Cell('l'), Grid.Cell('e')]
+    print(dictionary.isWord(test))
+    test = [Grid.Cell('a'), Grid.Cell('p'), Grid.Cell('p'), Grid.Cell('l'), Grid.Cell('o')]
+    print(dictionary.isWord(test))
+
 if __name__ == '__main__':
+    pass
     #create_valid_dictionary("dictionary.txt")
-    #test_wordFinder()
-        
-
-
+    #__test_wordFinder()
+    __testIsWord()
+#Reached end
