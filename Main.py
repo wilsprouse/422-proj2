@@ -3,7 +3,7 @@ import WordFinder
 import AStar
 import Grid
 
-RUN_CONSTANT = 50
+RUN_CONSTANT = 5
 
 # ----------------------
 # HELP PRINTING FUNCs.
@@ -50,6 +50,8 @@ def run(args, argv):
     # Parse Values
     row = 3
     col = 3
+    mult = 1/max(row, col)
+    const = (RUN_CONSTANT//max(row, col)) + 1
     dictname = 'default_dict.txt'
     exportname = None
 
@@ -75,6 +77,26 @@ def run(args, argv):
                 return
             try:
                 col = int(argv[index])
+            except ValueError:
+                print(                                      # ERROR: param not integer
+                    f'Error setting col: \'{argv[index]}\' not integer.')
+                return
+        elif tag == '-k' or tag == '--ChoiceConstant':  # SET CONSTANT
+            if index == args:
+                print('No value given for column')
+                return
+            try:
+                const = int(argv[index])
+            except ValueError:
+                print(  # ERROR: param not integer
+                    f'Error setting col: \'{argv[index]}\' not integer.')
+                return
+        elif tag == '-m' or tag == '--ChoiceMultiplier':# SET MULTIPLIER
+            if index == args:
+                print('No value given for column')
+                return
+            try:
+                mult = int(argv[index])
             except ValueError:
                 print(                                      # ERROR: param not integer
                     f'Error setting col: \'{argv[index]}\' not integer.')
@@ -105,7 +127,7 @@ def run(args, argv):
         return
 
     # print(f'{row}, {col}')
-    grid, iterations = AStar.aStarSearch(Grid.Grid(row, col), dictionary, choiceMin=RUN_CONSTANT//(row*col))
+    grid, iterations = AStar.aStarSearch(Grid.Grid(row, col), dictionary, choiceMin=const, choiceMult=mult)
     if exportname is None:
         print(f'Crossword created after {iterations} iterations.')
         print(str(grid))
