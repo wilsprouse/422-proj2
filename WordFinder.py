@@ -11,7 +11,7 @@ class WordFinder:
 
     def importFromList(self, list, maxWordLength=9999):
         for word in list:
-            if len(word) < maxWordLength: self.addWord(word)
+            if len(word) <= maxWordLength: self.addWord(word)
 
     def importFromFile(self, filepath, maxWordLength=9999):
         """
@@ -21,7 +21,7 @@ class WordFinder:
         """
         fp = open(filepath, 'r')
         for word in fp:
-            if len(word) < maxWordLength: self.addWord(word[:-1])
+            if len(word) <= maxWordLength: self.addWord(word[:-1])
         fp.close()
 
     def importFromJson(self, filepath):
@@ -107,17 +107,14 @@ class WordFinder:
 
 
 def create_valid_dictionary(filepath):
-    try:
-        fp = open(filepath, 'r')
-    except FileNotFoundError:
-        raise FileNotFoundError()
+    fp = open(filepath, 'r')
     #from Grid import Cell
     holder = set()                              # Holder to make sure there are no repeating words
-    searcher = f"^[{Cell.ALPHABET[:-1]}]+$"     # Scan for characters excluding the wall character
+    searcher = f"^[{Grid.Cell.ALPHABET[:-1]}]+$"     # Scan for characters excluding the wall character
     for line in fp:
-        edited = re.search(searcher, line.lower()).group()
-        if edited != None and len(edited) > 1:
-            holder.add(edited)
+        edited = re.search(searcher, line.lower())
+        if edited != None and len(edited.group()) > 1:
+            holder.add(edited.group())
     fp.close()
 
     newFilepath = filepath[:filepath.rfind('.')] + '.new' + filepath[filepath.rfind('.'):]
