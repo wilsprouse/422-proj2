@@ -7,12 +7,13 @@ import json
 class WordFinder:
     def __init__(self):
         self.__dict = dict()
+        self.__maxdepth = 0
 
-    def importFromList(self, list):
+    def importFromList(self, list, maxWordLength=9999):
         for word in list:
-            self.addWord(word)
+            if len(word) < maxWordLength: self.addWord(word)
 
-    def importFromFile(self, filepath):
+    def importFromFile(self, filepath, maxWordLength=9999):
         """
         imports words from backing file (.txt)
         :param filepath:
@@ -20,8 +21,7 @@ class WordFinder:
         """
         fp = open(filepath, 'r')
         for word in fp:
-            #print(word)
-            self.addWord(word[:-1])
+            if len(word) < maxWordLength: self.addWord(word[:-1])
         fp.close()
 
     def importFromJson(self, filepath):
@@ -37,6 +37,8 @@ class WordFinder:
     def addWord(self, word):
         dictionaryLevel = self.__dict # Save access level (for quicker accessing)
         #print(id(dictionaryLevel))
+        if len(word) > self.__maxdepth:
+            self.__maxdepth = len(word)
         for index in range(len(word)):
             #print(f"\t{id(dictionaryLevel)}")
             char = word[index].lower()
@@ -55,15 +57,17 @@ class WordFinder:
 
         for index in range(len(line)):
             char = line[index].getChosen()
-            if char not in dictionaryLevel:
+            if char is None or char not in dictionaryLevel:
                 return False
             else:
                 dictionaryLevel = dictionaryLevel[char]['letters']
         return True
 
-    def getWords(self, line):
+    def getWords(self, line, minSize=2):
+        minSize = min(self.__maxdepth, minSize)
+
         ret = []
-        for start in range(len(line) - 1): # Start at all points except the last one (will not be adding one letter words)
+        for start in range(len(line) - (minSize-1)): # Start at all points except the last one (will not be adding one letter words)
             states = util.Queue()
             stateLine = line
             if start > 0: # if not adding to beginning of line, add wall character to start of word
@@ -87,8 +91,8 @@ class WordFinder:
                             #foundWord
                             if pos + 1 < len(newLine): # if pos + 1 in line (no IndexError)
                                 newLine[pos + 1] = Grid.CELL_WALL
-                            ret.append(newLine)
-
+                            if pos - start >= minSize:
+                                ret.append(newLine)
                         states.push((newLine, pos + 1, dictionaryLevel[validChar]['letters']))
         return ret
 

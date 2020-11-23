@@ -1,3 +1,7 @@
+import time
+
+
+import random
 import copy
 import math
 import WordFinder
@@ -7,6 +11,9 @@ from ErrorChecker import shutOffLeftRight, shutOffAboveBelow
 class Cell:
     WALL_CHAR = '#'
     ALPHABET = 'abcdefghijklmnopqrstuvwxyz' + WALL_CHAR  # alphabet + wall character
+
+
+    # INITIALIZER
 
     def __init__(self, value=None):
         self.__value = 0
@@ -45,30 +52,6 @@ class Cell:
             self.__value |= 1 << pos
         else:
             self.__value &= ~(1 << pos)
-
-    def __copy__(self):
-        """
-        Copy value into a new cell
-        """
-        return Cell(self.__value)
-
-    def __deepcopy__(self, memodict={}):
-        """
-        Copy both the class and the values in the class (will not share any data)
-        """
-        return Cell(copy.deepcopy(self.__value, memodict))
-
-    def __and__(self, other):
-        """Bitwise and operator (does the same)"""
-        return Cell(self.__value & other.getValues())
-
-    def __or__(self, other):
-        """Bitwise or operator (does the same)"""
-        return Cell(self.__value | other.getValues())
-
-    def __xor__(self, other):
-        """Bitwise xor (does the same)"""
-        return Cell(self.__value ^ other.getValues())
 
     def __invert__(self):
         """Bitwise not, inverts the cell (copying the data)"""
@@ -146,7 +129,7 @@ class Cell:
             return '?'
         return tmp
 
-    def __repr__(self):
+    def __format__(self, format_spec):
         return str(self)
 
     def toList(self):
@@ -160,6 +143,20 @@ class Cell:
             if tmp in self:
                 ret.append(tmp)
         return ret
+
+    # COPIERS
+
+    def __copy__(self):
+        """
+        Copy value into a new cell
+        """
+        return Cell(self.__value)
+
+    def __deepcopy__(self, memodict={}):
+        """
+        Copy both the class and the values in the class (will not share any data)
+        """
+        return Cell(copy.deepcopy(self.__value, memodict))
 
     # HELPERS
 
@@ -267,7 +264,7 @@ class Grid:
 
     def isValid(self, dictionary):
         #print('hi')
-        for _, location in self.__getNextAdditionPoints():
+        for _, location in self.findLines(lambda list : all([cell.isChosen() for cell in list])):
             #print(f'checking {location}')
             if not dictionary.isWord(location):
                 #print('Not good')
@@ -275,7 +272,7 @@ class Grid:
             #print('succeeded')
         return True
 
-    def getNextGridStates(self, dictionary):
+    def getNextGridStates(self, dictionary, maxWords=100):
         """
         Creates successor grid states based on current state by...
             - Finding where to input subsequent words (Row / Col Chooser)
@@ -283,9 +280,12 @@ class Grid:
             - Return these states
         """
         ret = []
-        for metadata, location in self.__getNextAdditionPoints(lambda list : not all([cell.isChosen() for cell in list])):
+        #print(type(linesleft))
+        for metadata, location in random.sample(self.findLines(lambda list: not all([cell.isChosen() for cell in list])), 1):
             startRow, startCol, direction = metadata
-            words = dictionary.getWords(location)
+            words = dictionary.getWords(location, len(location)//2)
+            if len(words) > maxWords:
+                words = random.sample(words, maxWords)
             for word in words:
                 new_grid = copy.deepcopy(self)
                 if direction == 'Horizontal':
@@ -314,7 +314,10 @@ class Grid:
                 ret.append(new_grid)
         return ret
 
-    def __getNextAdditionPoints(self, requirements=lambda list :True):
+
+
+    def findLines(self, requirements=lambda list :True):
+        startTime = time.time()
         pos_left = []
         col = 0
         while col < self.cols:
@@ -330,7 +333,7 @@ class Grid:
                         #    alreadyComplete = False
                         pos.append(self[row, col])
                         row += 1
-                        if row == self.cols:
+                        if row == self.rows:
                             break
                     #if len(pos) != 1 and not alreadyComplete:
                     #print(f'{[cell.isChosen() for cell in pos]} -> {requirements(pos)}')
@@ -361,7 +364,9 @@ class Grid:
                         pos_left.append(((row, save_col, 'Horizontal'), pos))
                 col += 1
             row += 1
+        #print(f'findLines ran in {time.time() - startTime} sec.')
         return pos_left
+
 
 
 def __test_grid():
@@ -522,7 +527,7 @@ def cell_tutorial():
 if __name__ == '__main__':
     # __test_grid()
     # __cell_test()
-    # cell_tutorial()
-    __test_getNext()
+    cell_tutorial()
+    # __test_getNext()
     # __test_getNextAdditionPoints()
     # __testGridCopy()
