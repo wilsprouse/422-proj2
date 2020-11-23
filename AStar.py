@@ -33,9 +33,9 @@ def aStarSearch(grid, dictionary, heuristic=nullHeuristic, choiceMult=1, choiceM
         #print(f"Scanning {gridState}", end='\t')
         if gridState.isComplete() and gridState.isValid(dictionary): # fine to test it this way since the python and statement will only test the second case if the first one is true
             #print("DONE")
-            h = hpy()
-            print(h.heap())
-            print(f'Found same state {times_visited} times.')
+            #h = hpy()
+            #print(h.heap())
+            #print(f'Found same state {times_visited} times.')
             return gridState, iterations
 
         successors = gridState.getNextGridStates(dictionary, int(choiceMult * (depth + 1)) + choiceMin)
