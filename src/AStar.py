@@ -4,17 +4,38 @@ import random
 import WordFinder
 import Grid
 import time
-from guppy import hpy
+#from guppy import hpy
+import Heuristic
 
 
 def nullHeuristic(gridState):
     #newState, depth = gridState
     #return depth
-    # return random.random()
-    return 1
+    return random.random()
+    #return 1
+
+def getHeuristic(gridState):
+    #state, depth = gridState
+    score = 0
+    complete = 0
+    #print(gridState)
+    for i in range(gridState[0].rows):
+        for j in range(gridState[0].cols):
+            tempScore, tempComplete = Heuristic.getScore(gridState[0].__getitem__((i, j)))
+            score += tempScore
+            complete += tempComplete
+    #totalCells = gridState[0].rows*gridState[0].cols
+    #heuristic = score*(complete/totalCells)
+    if complete == 0:
+        heuristic = 0
+    else:
+        heuristic = score/complete
+    return heuristic
+
+#loop through every cell in grid?
 
 
-def aStarSearch(grid, dictionary, heuristic=nullHeuristic, choiceMult=1, choiceMin=1):
+def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMin=1):
     visited = [] # Swapped to dict for faster accessing
     sorter = util.PriorityQueueWithFunction(heuristic)
     sorter.push((grid, 0))
@@ -56,7 +77,7 @@ def aStarSearch(grid, dictionary, heuristic=nullHeuristic, choiceMult=1, choiceM
 
 
 def main(dictionary):
-    grid = Grid.Grid(2,2)
+    grid = Grid.Grid(5,5)
     #print('------------------------------------')
     completedGrid, iterations = aStarSearch(grid, dictionary, choiceMult=1)
     print(f'completed grid after {iterations} iterations.\nResult:\n{str(completedGrid)}')
@@ -65,7 +86,7 @@ def main(dictionary):
 if __name__ == '__main__':
     dictionary = WordFinder.WordFinder()
     startTime = time.time()
-    dictionary.importFromFile('5000-words.txt')
+    dictionary.importFromFile('./txt_files/5000-words.txt')
     endTime = time.time()
     print(f'Dictionary loaded in {endTime - startTime} sec.')
     #dictionary.importFromList(['is', 'it', 'to', 'an', 'on', 'no'])
