@@ -52,7 +52,7 @@ def run(args, argv):
     col = 3
     mult = 1/max(row, col)
     const = (RUN_CONSTANT//max(row, col)) + 1
-    dictname = 'default_dict.txt'
+    dictname = 'txt_files/default_dict.txt'
     exportname = None
 
     index = 2
@@ -132,9 +132,9 @@ def run(args, argv):
         print(f'Crossword created after {iterations} iterations.')
         print(str(grid))
     else:
-        export(exportname)
+        export(exportname, grid)
 
-def export(filepath):
+def export(filepath, grid):
     pass
 
 def createDictionary(filepath):
