@@ -21,7 +21,7 @@ class WordFinder:
         """
         fp = open(filepath, 'r')
         for word in fp:
-            if len(word) <= maxWordLength: self.addWord(word[:-1])
+            if len(word) <= maxWordLength + 1: self.addWord(word[:-1])
         fp.close()
 
     def importFromJson(self, filepath):
@@ -60,15 +60,17 @@ class WordFinder:
             if char is None or char not in dictionaryLevel:
                 return False
             else:
+                if index + 1 == len(line) and dictionaryLevel[char]['isComplete']:
+                    return True
                 dictionaryLevel = dictionaryLevel[char]['letters']
-        return True
+        return False
 
     def getWords(self, line, minSize=2):
         minSize = min(self.__maxdepth, minSize)
 
         ret = []
         for start in range(len(line) - (minSize-1)): # Start at all points except the last one (will not be adding one letter words)
-            states = util.Queue()
+            states = util.Stack()
             stateLine = line
             if start > 0: # if not adding to beginning of line, add wall character to start of word
                 if stateLine[start - 1].isChosen():
@@ -90,7 +92,10 @@ class WordFinder:
                         if dictionaryLevel[validChar]['isComplete']:
                             #foundWord
                             if pos + 1 < len(newLine): # if pos + 1 in line (no IndexError)
-                                newLine[pos + 1] = Grid.CELL_WALL
+                                if currLine[pos + 1].isChosen():
+                                    continue
+                                else:
+                                    newLine[pos + 1] = Grid.CELL_WALL
                             if pos - start >= minSize:
                                 ret.append(newLine)
                         states.push((newLine, pos + 1, dictionaryLevel[validChar]['letters']))

@@ -1,6 +1,5 @@
 import time
 
-
 import random
 import copy
 import math
@@ -11,7 +10,6 @@ from ErrorChecker import shutOffLeftRight, shutOffAboveBelow
 class Cell:
     WALL_CHAR = '#'
     ALPHABET = 'abcdefghijklmnopqrstuvwxyz' + WALL_CHAR  # alphabet + wall character
-
 
     # INITIALIZER
 
@@ -132,6 +130,9 @@ class Cell:
     def __format__(self, format_spec):
         return str(self)
 
+    def __repr__(self):
+        return str(self)
+
     def toList(self):
         """
         Get representation of Cell. Returns list of one character strings representing each possible character.
@@ -178,6 +179,9 @@ CELL_WALL = Cell(Cell.WALL_CHAR)
 
 
 class Grid:
+    AddVertically = lambda self, point, val: (point[0] + val, point[1])
+    AddHorizontally = lambda self, point, val: (point[0], point[1] + val)
+
     def __init__(self, totalRows, totalColumns):
         self.rows = totalRows
         self.cols = totalColumns
@@ -218,7 +222,7 @@ class Grid:
         for row in range(self.rows):
             ret += line
             for col in range(self.cols):
-                ret += f'|{self[row,col]}'
+                ret += f'|{self[row, col]}'
             ret += '|\n'
         ret += line
         return ret
@@ -232,6 +236,13 @@ class Grid:
                 if self[row, col] != other[row, col]:
                     return False
         return True
+
+    def __contains__(self, item):
+        assert type(item) is tuple
+        row, col = item
+        # print(f'0 <= {row} < self.rows and 0 <= {col} < self.cols')
+        # print(0 <= row < self.rows and 0 <= col < self.cols)
+        return 0 <= row < self.rows and 0 <= col < self.cols
 
     def __copy__(self):
         newGrid = Grid(self.rows, self.cols)
@@ -263,13 +274,9 @@ class Grid:
         return True
 
     def isValid(self, dictionary):
-        #print('hi')
-        for _, location in self.findLines(lambda list : all([cell.isChosen() for cell in list])):
-            #print(f'checking {location}')
+        for _, location in self.findLines(lambda list: all([cell.isChosen() for cell in list])):
             if not dictionary.isWord(location):
-                #print('Not good')
                 return False
-            #print('succeeded')
         return True
 
     def getNextGridStates(self, dictionary, maxWords=100):
@@ -279,6 +286,85 @@ class Grid:
             - Inserting all possible words into that point as separate substates (WordFinder)
             - Return these states
         """
+        '''
+        startingPoint = random.randint(0, self.rows - 1), random.randint(0, self.cols - 1)
+        while self[startingPoint] == CELL_WALL:
+            startingPoint = random.randint(0, self.rows - 1), random.randint(0, self.cols - 1)
+        verticalLine = self.__getNextLine(startingPoint, 'Vertical')
+        # print(verticalLine)
+        horizontalLine = self.__getNextLine(startingPoint, 'Horizontal')
+        # print(horizontalLine)
+
+        start, direction, line = horizontalLine
+        if len(verticalLine[2]) > len(line):  # Add longer line first
+            start, direction, line = verticalLine
+        #print(start, direction, line)
+        stp1 = []
+        if not all([cell.isChosen() for cell in line]):
+            #print('hi')
+            for word in dictionary.getWords(line, len(line)//2):
+                # print('hi')
+                new_grid = copy.deepcopy(self)
+                if direction == 'Horizontal':
+                    iterate = self.AddHorizontally  # Horizontal iterator
+                elif direction == 'Vertical':
+                    iterate = self.AddVertically  # Vertical iterator
+                else:
+                    raise Exception(f'Failed both directions ({direction})')
+                pos = start
+                for cell in word:
+                    #print(pos)
+                    if pos not in self:
+                        print(self)
+                        print(start, direction, line)
+                        print(pos)
+                    new_grid[pos] = cell
+                    if direction == 'Vertical':
+                        shutOffLeftRight(new_grid, pos)
+                    elif direction == 'Horizontal':
+                        shutOffAboveBelow(new_grid, pos)
+                    pos = iterate(pos, 1)
+                stp1.append(new_grid)
+        else:
+            #print('failed')
+            stp1.append(self)
+
+        # for grid in stp1:
+        #    print(str(grid))
+
+        start, direction, line = horizontalLine
+        if len(verticalLine[2]) < len(line):  # Add longer line first
+            start, direction, line = verticalLine
+
+        ret = []
+        if not all([cell.isChosen() for cell in line]):
+            #print('hi again')
+            for grid in stp1:
+                for word in dictionary.getWords(line, len(line) // 2):
+                    new_grid = copy.deepcopy(grid)
+                    if direction == 'Horizontal':
+                        iterate = self.AddHorizontally  # Horizontal iterator
+                    elif direction == 'Vertical':
+                        iterate = self.AddVertically  # Vertical iterator
+                    else:
+                        raise Exception('Failed both directions')
+                    pos = start
+                    for cell in word:
+                        new_grid[pos] = cell
+                        if direction == 'Vertical':
+                            shutOffLeftRight(new_grid, pos)
+                        elif direction == 'Horizontal':
+                            shutOffAboveBelow(new_grid, pos)
+                        pos = iterate(pos, 1)
+                    ret.append(new_grid)
+        else:
+            #print('failed again')
+            ret = stp1
+        #for grid in ret:
+        #    print(str(grid))
+        print(len(ret))
+        return ret
+        '''
         ret = []
         #print(type(linesleft))
         lines = self.findLines(lambda list: not all([cell.isChosen() for cell in list]))
@@ -304,9 +390,9 @@ class Grid:
                     #print(f'Adding {cell} to point {point}', end='\t')
                     new_grid[point] = cell
                     if direction == 'Vertical':
-                        shutOffLeftRight(self, point)
+                        shutOffLeftRight(new_grid, point)
                     elif direction == 'Horizontal':
-                        shutOffAboveBelow(self, point)
+                        shutOffAboveBelow(new_grid, point)
                     else:
                         raise Exception('Failed both directions')
                     point = iterate(point)
@@ -317,10 +403,42 @@ class Grid:
                 ret.append(new_grid)
         return ret
 
+    '''
+    def __getNextLine(self, middle, direction):
+        func = self.AddHorizontally
+        if direction == 'Vertical':
+            func = self.AddVertically
 
+        line = [self[middle]]
+        start = middle
+        print(start)
+        negativeEnd = False
+        positiveEnd = False
+        for delta in range(1, max(self.rows, self.cols)):
+            if negativeEnd and positiveEnd:
+                # print('end early')
+                break
+            if not negativeEnd:
+                posNeg = func(middle, -delta)
+                if posNeg not in self or self[posNeg] == CELL_WALL:
+                    start = func(posNeg, 1)
+                    print(f'updating start to {start}')
+                    negativeEnd = True
+                    continue
+                #print(f'adding negatively {posNeg}')
+                line.insert(0, self[posNeg])
+            if not positiveEnd:
+                posPos = func(middle, delta)
+                if posPos not in self or self[posPos] == CELL_WALL:
+                    positiveEnd = True
+                    continue
+                #print(f'adding positively {posPos}')
+                line.append(self[posPos])
+        return start, direction, line
+    '''
 
-    def findLines(self, requirements=lambda list :True):
-        #startTime = time.time()
+    def findLines(self, requirements=lambda list: True):
+        # startTime = time.time()
         pos_left = []
         col = 0
         while col < self.cols:
@@ -329,22 +447,21 @@ class Grid:
                 if self[row, col] != CELL_WALL:
                     save_row = row
                     pos = []
-                    #alreadyComplete = True
+                    # alreadyComplete = True
                     while self[row, col] != CELL_WALL:
-                        #tmp = self[row, col]
-                        #if not tmp.isChosen():
+                        # tmp = self[row, col]
+                        # if not tmp.isChosen():
                         #    alreadyComplete = False
                         pos.append(self[row, col])
                         row += 1
                         if row == self.rows:
                             break
-                    #if len(pos) != 1 and not alreadyComplete:
-                    #print(f'{[cell.isChosen() for cell in pos]} -> {requirements(pos)}')
+                    # if len(pos) != 1 and not alreadyComplete:
+                    # print(f'{[cell.isChosen() for cell in pos]} -> {requirements(pos)}')
                     if len(pos) != 1 and requirements(pos):
                         pos_left.append(((save_row, col, 'Vertical'), pos))
                 row += 1
             col += 1
-
 
         row = 0
         while row < self.rows:
@@ -353,23 +470,22 @@ class Grid:
                 if self[row, col] != CELL_WALL:
                     pos = []
                     save_col = col
-                    #alreadyComplete = True
+                    # alreadyComplete = True
                     while self[row, col] != CELL_WALL:
                         tmp = self[row, col]
-                        #if not tmp.isChosen():
+                        # if not tmp.isChosen():
                         #    alreadyComplete = False
                         pos.append(tmp)
                         col += 1
                         if col == self.cols:
                             break
-                    #if len(pos) != 1 and not alreadyComplete:
+                    # if len(pos) != 1 and not alreadyComplete:
                     if len(pos) != 1 and requirements(pos):
                         pos_left.append(((row, save_col, 'Horizontal'), pos))
                 col += 1
             row += 1
-        #print(f'findLines ran in {time.time() - startTime} sec.')
+        # print(f'findLines ran in {time.time() - startTime} sec.')
         return pos_left
-
 
 
 def __test_grid():
@@ -441,6 +557,7 @@ def __test_getNext():
     for grid in test:
         print(str(grid))
 
+
 def __test_getNextAdditionPoints():
     grid = Grid(4, 4)
     test_grid = [
@@ -455,7 +572,7 @@ def __test_getNextAdditionPoints():
             if cell != None:
                 grid[x, y] = Cell(cell)
     print('testing for getNext')
-    test = grid.getNextAdditionPoints(lambda list : not all([cell.isChosen() for cell in list]))
+    test = grid.getNextAdditionPoints(lambda list: not all([cell.isChosen() for cell in list]))
     for cell in test:
         print(cell)
     print('testing for isComplete')
