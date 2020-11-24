@@ -77,7 +77,7 @@ def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMi
 
 
 def main(dictionary):
-    grid = Grid.Grid(5,5)
+    grid = Grid.Grid(3,3)
     #print('------------------------------------')
     completedGrid, iterations = aStarSearch(grid, dictionary, choiceMult=1)
     print(f'completed grid after {iterations} iterations.\nResult:\n{str(completedGrid)}')

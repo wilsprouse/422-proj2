@@ -4,44 +4,59 @@ def getScore(letter):
     currentLetter = letter.getChosen()
     #print(currentLetter)
 
+
+    if currentLetter == None:
+        return 0,0
+    elif currentLetter in 'ea':
+        score = 5.61
+        complete = 1
+    elif currentLetter in 'riot': #'DGOPU':
+        score = 9.24
+        complete = 1
+    elif currentLetter in 'nslc': #'BCFHM':
+        score = 12.59
+        complete = 1
+    elif currentLetter in 'udpmh': #'KVWY':
+        score = 18.51
+        complete = 1
+    elif currentLetter in 'gb': #'JX':
+        score = 33
+        complete = 1
+    elif currentLetter in 'fyw': #'QZ':
+        score = 38.64
+        complete = 1
+    elif currentLetter in 'kvxzjq': #'QZ':
+        score = 56.88
+        complete = 1
+    elif currentLetter in '#':
+        score = 5
+    """
     if currentLetter == None:
         return 0,0
     elif currentLetter in 'aeilnrst':
-        score = 1#10
+        score = 1
         complete = 1
     elif currentLetter in 'dgopu': #'DGOPU':
-        score = 2#9
+        score = 10
         complete = 1
     elif currentLetter in 'bcfhm': #'BCFHM':
-        score = 4#7
+        score = 20
         complete = 1
     elif currentLetter in 'kvwy': #'KVWY':
-        score = 7#4
+        score = 30
         complete = 1
     elif currentLetter in 'jx': #'JX':
-        score = 9 #2
+        score = 40
         complete = 1
     elif currentLetter in 'qz': #'QZ':
-        score = 10#1
+        score = 100
         complete = 1
     elif currentLetter in '#':
-        complete = 1
-    
+        score = 1
+    """
     return score, complete
 
-def getHeuristic(gridState):
-    #state, depth = gridState
-    score = 0
-    complete = 0
-    #print(gridState)
-    for i in range(gridState[0].rows):
-        for j in range(gridState[0].cols):
-            tempScore, tempComplete = Heuristic.getScore(gridState[0].__getitem__((i, j)))
-            score += tempScore
-            complete += tempComplete
-    totalCells = gridState[0].rows*gridState[0].cols
-    heuristic = score*(complete/totalCells)
-    return heuristic
+
 
 #loop through every cell in grid?
 #for every cell in grid
