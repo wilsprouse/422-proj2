@@ -4,33 +4,6 @@ def getScore(letter):
     currentLetter = letter.getChosen()
     #print(currentLetter)
 
-
-    if currentLetter == None:
-        return 0,0
-    elif currentLetter in 'ea':
-        score = 5.61
-        complete = 1
-    elif currentLetter in 'riot': #'DGOPU':
-        score = 9.24
-        complete = 1
-    elif currentLetter in 'nslc': #'BCFHM':
-        score = 12.59
-        complete = 1
-    elif currentLetter in 'udpmh': #'KVWY':
-        score = 18.51
-        complete = 1
-    elif currentLetter in 'gb': #'JX':
-        score = 33
-        complete = 1
-    elif currentLetter in 'fyw': #'QZ':
-        score = 38.64
-        complete = 1
-    elif currentLetter in 'kvxzjq': #'QZ':
-        score = 56.88
-        complete = 1
-    elif currentLetter in '#':
-        score = 5
-    """
     if currentLetter == None:
         return 0,0
     elif currentLetter in 'aeilnrst':
@@ -53,7 +26,7 @@ def getScore(letter):
         complete = 1
     elif currentLetter in '#':
         score = 1
-    """
+
     return score, complete
 
 
