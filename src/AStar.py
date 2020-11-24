@@ -52,7 +52,7 @@ def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMi
         startTime = time.time()
         successors = gridState.getNextGridStates(dictionary, int(choiceMult * (depth + 1)) + choiceMin)
         endTime = time.time()
-        print(f'found successors in {endTime - startTime}')
+        #print(f'found successors in {endTime - startTime}')
         successors
         for newState in successors:
             if newState.isValid(dictionary):
