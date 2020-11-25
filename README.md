@@ -62,3 +62,5 @@ In the wiki are the following categories describing the process of building this
 Additional Notes:
 --
 The project runs in reasonable time up to a 5x5 grid, ranging from 10 to 30 seconds. For a 6x6-grid, for example, it takes about 10-20 minutes. Beyond that, run time becomes exponentially longer.  
+
+Contributors: Graham Whealan, Shoshonah Bernhardt, William Sprouse
