@@ -11,15 +11,26 @@ MAX_ATTEMPTS = 50
 # ----------------------
 # HELP PRINTING FUNCs.
 # ----------------------
+def printWithStarter(string, start='', end='\n'):
+    print(f'{start}{string}', end=end)
+def help_general(start=''):
+    printWithStarter('Crossword Builder v1.0\n', start=start)
+    help_run(start=start+'\t')
+    print()
+    help_dict(start=start + '\t')
 
-def help_general(start='', end=''):
-    print('Print the help stuff')
+def help_run(start=''):
+    printWithStarter('python Main.py crossword <options>',start=start)
+    printWithStarter('\t-r, --row: Sets the row length (defaults to 3)',start=start)
+    printWithStarter('\t-c, --column: sets the column length (defaults to 3)',start=start)
+    printWithStarter('\t-d, --dictionary: choose a backing dictionary file (supports only txt files currently)',start=start)
+    printWithStarter('\t-e, --export: set an export file to return the completed grid (supports txt and html)',start=start)
+    print()
+    printWithStarter('\t-k, ----choiceConstant: choose minimum choices (used for testing)',start=start)
+    printWithStarter('\t-m, --choiceMultiplier: choose choice multiplier (used for testing)',start=start)
 
-def help_run(start='', end=''):
-    print('Print help info for run')
-
-def help_dict(start='', end=''):
-    print('Print help for create dictionary')
+def help_dict(start=''):
+    printWithStarter('python Main.py dictionary [file]',start=start)
 
 # ----------------------
 # MAIN RUN
@@ -72,7 +83,7 @@ def run(args, argv):
                 print(                                      # ERROR: param not integer
                     f'Error setting row: \'{argv[index]}\' not integer.')
                 return False
-        elif tag == '-c' or tag == '--col':             # SET COL LENGTH
+        elif tag == '-c' or tag == '--column':             # SET COL LENGTH
             if index == args:
                 print('No value given for column')
                 return False
@@ -82,7 +93,7 @@ def run(args, argv):
                 print(                                      # ERROR: param not integer
                     f'Error setting col: \'{argv[index]}\' not integer.')
                 return False
-        elif tag == '-k' or tag == '--ChoiceConstant':  # SET CONSTANT
+        elif tag == '-k' or tag == '--choiceConstant':  # SET CONSTANT
             if index == args:
                 print('No value given for column')
                 return False
@@ -92,7 +103,7 @@ def run(args, argv):
                 print(  # ERROR: param not integer
                     f'Error setting col: \'{argv[index]}\' not integer.')
                 return False
-        elif tag == '-m' or tag == '--ChoiceMultiplier':# SET MULTIPLIER
+        elif tag == '-m' or tag == '--choiceMultiplier':# SET MULTIPLIER
             if index == args:
                 print('No value given for column')
                 return False
@@ -135,14 +146,30 @@ def run(args, argv):
         print('Crossword creation failed. Exiting')
         return False
     print(f'Crossword created!!')
+
     if exportname is None:
         print(str(grid))
-    else:
-        export(exportname, grid)
+    elif not export(exportname, grid):
+        print(str(grid))
     return True
 
 def export(filepath, grid):
-    pass
+    try:
+        extension = filepath.split('.')[-1]
+        if extension == 'txt':
+            fp = open(filepath, 'w')
+            fp.write(str(grid))
+        elif extension == 'html':
+            fp = open(filepath, 'w')
+            pass # For shoshanah to do
+        else:
+            print(f'Error: {extension} file not supported.')
+            return False
+        fp.close()
+        return True
+    except FileNotFoundError:
+        print('Error creating export file, printing to stdout.')
+    return False
 
 def createDictionary(filepath):
     try:
