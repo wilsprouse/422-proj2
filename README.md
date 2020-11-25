@@ -36,7 +36,7 @@ Build, deployment and run process:
 	-r <number_of_rows>
      - To specify a dictionary:
 	-d <_dictionary>
-     - To specify an output html file
+     - To specify an output html file:
 	-e <export_file_name>
      - To specify a multiplier (the further into the grid, the more words it will choose):
 	-m <_multiplier>
