@@ -7,11 +7,15 @@ import json
 class WordFinder:
     def __init__(self):
         self.__dict = dict()
+        self.__popN = dict()
+        self.__wordN = 0
         self.__maxdepth = 0
 
     def importFromList(self, list, maxWordLength=9999):
         for word in list:
-            if len(word) <= maxWordLength: self.addWord(word)
+            if len(word) <= maxWordLength:
+                self.__wordN += 1
+                self.addWord(word)
 
     def importFromFile(self, filepath, maxWordLength=9999):
         """
@@ -21,7 +25,9 @@ class WordFinder:
         """
         fp = open(filepath, 'r')
         for word in fp:
-            if len(word) <= maxWordLength + 1: self.addWord(word[:-1])
+            if len(word) <= maxWordLength + 1:
+                self.__wordN += 1
+                self.addWord(word[:-1])
         fp.close()
 
     def importFromJson(self, filepath):
@@ -35,6 +41,9 @@ class WordFinder:
         fp.close()
 
     def addWord(self, word):
+        if len(word) not in self.__popN:
+            self.__popN[len(word)] = 0
+        self.__popN[len(word)] += 1
         dictionaryLevel = self.__dict # Save access level (for quicker accessing)
         #print(id(dictionaryLevel))
         if len(word) > self.__maxdepth:
@@ -64,6 +73,16 @@ class WordFinder:
                     return True
                 dictionaryLevel = dictionaryLevel[char]['letters']
         return False
+
+    def getMinLength(self, n, max):
+        curr_words = 0
+        minLength = n
+        for i in range(n, 0, -1):
+            if n in self.__popN:
+                curr_words += self.__popN[n]
+            if curr_words > max:
+                minLength = i
+        return minLength
 
     def getWords(self, line, minSize=2):
         minSize = min(self.__maxdepth, minSize)

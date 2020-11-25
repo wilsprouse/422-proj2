@@ -35,7 +35,7 @@ def getHeuristic(gridState):
 #loop through every cell in grid?
 
 
-def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMin=1):
+def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMin=1, choiceRatio=0.5):
     sorter = util.PriorityQueueWithFunction(heuristic)
     sorter.push((grid, 0))
 
@@ -53,12 +53,14 @@ def aStarSearch(grid, dictionary, heuristic=getHeuristic, choiceMult=1, choiceMi
         successors = gridState.getNextGridStates(dictionary, int(choiceMult * (depth + 1)) + choiceMin)
         endTime = time.time()
         #print(f'found successors in {endTime - startTime}')
-        successors
+        startTime = time.time()
         for newState in successors:
             if newState.isValid(dictionary):
                 sorter.push((newState, depth + 1))
             else:
                 del(newState)
+        endTime = time.time()
+        #print(f'added successors in {endTime - startTime}')
     return None, iterations
 
 

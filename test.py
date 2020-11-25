@@ -1,5 +1,5 @@
-import Main
 import sys
+import run
 import time
 from os import system, name
 
@@ -16,7 +16,7 @@ def main(argc, argv):
         commandLine = f'Main.py crossword -r {row} -c {col}'
         inpt = commandLine.split(' ')
         startTime = time.time()
-        test = Main.main(len(inpt), inpt)
+        test = run.main(len(inpt), inpt)
         averageTime += time.time() - startTime
         if test:
             successes += 1

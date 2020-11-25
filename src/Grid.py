@@ -372,7 +372,7 @@ class Grid:
             return ret
         for metadata, location in random.sample(lines, 1):
             startRow, startCol, direction = metadata
-            words = dictionary.getWords(location, len(location)//2)
+            words = dictionary.getWords(location, dictionary.getMinLength(len(location), maxWords))
             if len(words) > maxWords:
                 words = random.sample(words, maxWords)
             for word in words:
@@ -458,7 +458,7 @@ class Grid:
                             break
                     # if len(pos) != 1 and not alreadyComplete:
                     # print(f'{[cell.isChosen() for cell in pos]} -> {requirements(pos)}')
-                    if len(pos) != 1 and requirements(pos):
+                    if len(pos) > 1 and requirements(pos):
                         pos_left.append(((save_row, col, 'Vertical'), pos))
                 row += 1
             col += 1
@@ -480,7 +480,7 @@ class Grid:
                         if col == self.cols:
                             break
                     # if len(pos) != 1 and not alreadyComplete:
-                    if len(pos) != 1 and requirements(pos):
+                    if len(pos) > 1 and requirements(pos):
                         pos_left.append(((row, save_col, 'Horizontal'), pos))
                 col += 1
             row += 1
