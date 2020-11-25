@@ -35,13 +35,13 @@ Build, deployment and run process:
      - To specify columns use:
 	-r <number_of_rows>
      - To specify a dictionary:
-	-d <dictionary>
+	-d <_dictionary>
      - To specify an output html file
 	-e <export_file_name>
      - To specify a multiplier (the further into the grid, the more words it will choose):
-	-m <multiplier>
+	-m <_multiplier>
      - To specify a constant (initial number of states the AStar will expand and the multiplier increases that value based on the depth.):
-	-k <constant>
+	-k <_constant>
 
 So creating a crossword with all the flags would wield a command that looks like:
 
