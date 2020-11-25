@@ -6,6 +6,7 @@ Requirements and Design Documentation:
 --
 The intent is to produce a viable, valid crossword puzzle with the size dimensions of length and width provided by the user. 
 The basic outline of how the program runs or works is:
+<<<<<<< HEAD
 - User enters the number of rows and columns
 - The dictionary then loads all possible words into a very big non-binary-tree data structure, with an indicator on the node of a tree when a word is complete from the root to that node
 - A word is chosen
@@ -15,6 +16,17 @@ The basic outline of how the program runs or works is:
 - When a word is placed, that word’s letters are decided for at least some of the cells of the row or column where the word is placed. Say the word is placed horizontally, say in row 2, columns 1-5. We call the functions of shutOffVerticalFollow() on the cells above the word, on cells of row 1, columns 1-5. For any letter in the word placed, shutOffVerticalPrecede() turns to 0 the bits for any letter in the ALPHABET-array per cell that cannot precede the letter assigned to the cell below, because those two letters would make an unattested combination. (Attested means that the linguistic construction [e.g. 2-letter combination] exists in any word in the language; unattested means that the linguistic construction [e.g. 2-letter combination] does not exist anywhere in the language.) We call shutOffVerticalFollow() to shut off the bits of the letters that would make an invalid 2-letter combination on all the cells below the placed word. 
 - We would follow the same logic when a word is placed vertically down a column with shutOffHorizontalPrecede() and shutOffHorizontalFollow() to shut off the bits of the letters that would make an unattested combination, in order to avoid ever putting an unattested 2-letter combination perpendicular to a word that has just been placed.   
 Continues to fill the grid, repeating steps D through i, gathering words from the tree data structure, until the grid is as complete as possible.
+=======
+User enters the number of rows and columns.
+The dictionary then loads all possible words into a very big non-binary-tree data structure, with an indicator on the node of a tree when a word is complete from the root to that node.
+A word is chosen.
+Word is placed in row or column. 
+When word is placed, cell’s ALPHABET attribute shuts off all other possible letters except chosen letter.
+When a word is placed, the letters for the cells where a word is placed are chosen, all other possible letters are eliminated for that cell. In a bit-array called ALPHABET for each cell, the bits representing all letters that were not chosen are turned off
+When a word is placed, that word’s letters are decided for at least some of the cells of the row or column where the word is placed. Say the word is placed horizontally, say in row 2, columns 1-5. We call the functions of shutOffVerticalFollow() on the cells above the word, on cells of row 1, columns 1-5. For any letter in the word placed, shutOffVerticalPrecede() turns to 0 the bits for any letter in the ALPHABET-array per cell that cannot precede the letter assigned to the cell below, because those two letters would make an unattested combination. (Attested means that the linguistic construction [e.g. 2-letter combination] exists in any word in the language; unattested means that the linguistic construction [e.g. 2-letter combination] does not exist anywhere in the language.) We call shutOffVerticalFollow() to shut off the bits of the letters that would make an invalid 2-letter combination on all the cells below the placed word. 
+We would follow the same logic when a word is placed vertically down a column with shutOffHorizontalPrecede() and shutOffHorizontalFollow() to shut off the bits of the letters that would make an unattested combination, in order to avoid ever putting an unattested 2-letter combination perpendicular to a word that has just been placed.   
+Continues to fill the grid, repeating steps D through I, gathering words from the tree data structure, until the grid is as complete as possible.
+>>>>>>> e2e0700522cf71120b44d2e4e40b8e14798f5e83
 The output can be viewed in the command line interface, or via double clicking the html file that gets created.
 
 Future Development:
