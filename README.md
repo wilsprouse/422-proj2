@@ -22,7 +22,7 @@ The dictionary then loads all possible words into a very big non-binary-tree dat
 A word is chosen.
 Word is placed in row or column. 
 When word is placed, cell’s ALPHABET attribute shuts off all other possible letters except chosen letter.
-When a word is placed, the letters for the cells where a word is placed are chosen, all other possible letters are eliminated for that cell. In a bit-array called ALPHABET for each cell, the bits representing all letters that were not chosen are turned off
+When a word is placed, the letters for the cells where a word is placed are chosen, all other possible letters are eliminated for that cell. In a bit-array called ALPHABET for each cell, the bits representing all letters that were not chosen are turned off.
 When a word is placed, that word’s letters are decided for at least some of the cells of the row or column where the word is placed. Say the word is placed horizontally, say in row 2, columns 1-5. We call the functions of shutOffVerticalFollow() on the cells above the word, on cells of row 1, columns 1-5. For any letter in the word placed, shutOffVerticalPrecede() turns to 0 the bits for any letter in the ALPHABET-array per cell that cannot precede the letter assigned to the cell below, because those two letters would make an unattested combination. (Attested means that the linguistic construction [e.g. 2-letter combination] exists in any word in the language; unattested means that the linguistic construction [e.g. 2-letter combination] does not exist anywhere in the language.) We call shutOffVerticalFollow() to shut off the bits of the letters that would make an invalid 2-letter combination on all the cells below the placed word. 
 We would follow the same logic when a word is placed vertically down a column with shutOffHorizontalPrecede() and shutOffHorizontalFollow() to shut off the bits of the letters that would make an unattested combination, in order to avoid ever putting an unattested 2-letter combination perpendicular to a word that has just been placed.   
 Continues to fill the grid, repeating steps D through I, gathering words from the tree data structure, until the grid is as complete as possible.
@@ -66,7 +66,7 @@ To test this, simply follow the instructions for how to run the project
 
 Organization:
 --
-This is the README file in the main branch of Wil Sprouse’s 422-proj2 repository. The README, and the src folder are in the home directory. The src directory contains all the code.
+This is the README file in the main branch of Wil Sprouse’s 422-proj2 repository. The README and the src folder are in the home directory. The src directory contains all the code.
 
 In the wiki are the following categories describing the process of building this project: Team roles, Coding parts delegated, meeting notes, developer logs.
 
