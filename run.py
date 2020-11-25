@@ -68,7 +68,7 @@ def run(args, argv):
     col = 3
     mult = RUN_MULT/max(row, col)
     const = (RUN_CONSTANT//max(row, col)) + 1
-    dictname = abspath(FUNC_PATH)'\\src\\default_dict.txt'
+    dictname = abspath(FUNC_PATH) + '\\src\\default_dict.txt'
     exportname = None
 
     index = 2
