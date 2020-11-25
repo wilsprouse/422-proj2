@@ -54,7 +54,7 @@ To test this, simply follow the instructions for how to run the project
 
 Organization:
 --
-This is the README file in the main branch of Wil Sprouse’s 422-proj2 repository. The README, and the src folder are in the home directory. The src directory contains all the code.
+This is the README file in the main branch of Wil Sprouse’s 422-proj2 repository. The README and the src folder are in the home directory. The src directory contains all the code.
 
 In the wiki are the following categories describing the process of building this project: Team roles, Coding parts delegated, meeting notes, developer logs.
 
