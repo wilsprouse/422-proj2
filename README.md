@@ -50,7 +50,14 @@ $ python3 run.py -c 4 -r 4 -d dictionary.txt -e output.html -m 2 -k 4
 
 Tests:
 --
-To test this, simply follow the instructions for how to run the project
+To test this, simply follow the instructions for how to run the project. 
+The expected result is a grid filled in with valid words. The issue is the run-time. 
+
+The A-star algorithm will always work, always produce a valid crossword, but it may take so long that the user decides to suspend execution. Even then, it is not an infinite loop. 
+A case that takes too long for the user to see the result would be considered undesirable. Developers are aware that this is likely on grids with 6 or more columns and 6 or more rows. 
+
+There may be words placed in the crossword that seem invalid, such as the two-letter word "ip". 
+However, that word actually is valid and is not an accident, among other possible unfamiliar valid words.
 
 
 Organization:
