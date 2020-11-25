@@ -60,5 +60,5 @@ This is the README file in the main branch of Wil Sprouse’s 422-proj2 reposito
 In the wiki are the following categories describing the process of building this project: Team roles, Coding parts delegated, meeting notes, developer logs.
 
 Additional Notes:
-
+--
 The project runs in reasonable time up to  5x5 grid, ranging 10 to 30 seconds. For a 6x6 for example, it takes about 10-20 minutes. Beyond that, run time becomes exponentially longer.  
