@@ -1,4 +1,5 @@
-##General:
+General:
+==
 The project is a program that generates a crossword puzzle. All words in all rows and columns are valid, according to a specific dictionary which can be provided by the user. 
 
 ##Requirements and Design Documentation: 
