@@ -3,6 +3,7 @@ General:
 The project is a program that generates a crossword puzzle. All words in all rows and columns are valid, according to a specific dictionary which can be provided by the user. 
 
 ##Requirements and Design Documentation: 
+==
 The intent is to produce a viable, valid crossword puzzle with the size dimensions of length and width provided by the user. 
 The basic outline of how the program runs or works is:
 User enters the number of rows and columns
@@ -17,11 +18,13 @@ Continues to fill the grid, repeating steps D through i, gathering words from th
 The output can be viewed in the command line interface, or via double clicking the html file that gets created.
 
 ##Future Development:
+==
 Plans for future development are to continue optimizing, shorten run-time, and offer users more variety of crossword puzzle themes and symmetrical designs. This works best on small puzzles, 5x5 or smaller, and the developers would like to see the grid be expanded with a valid puzzle still produced. At this point, clues for the solution to the puzzle generated are not developed, but that would be part of future development. In order to allow room for cleverness, word-play, or theme reference in the clues, the intent is not to merely give the dictionary definition for the clues. However perhaps a database or at least data structure matching solutions to clues with their clues could be accessible to the puzzle-generator in the future, and could allow users to include and coordinate numbering of clues with the row, column, or part of column or row to which the clue applies. 
 
 
 
 ##Build, deployment and run process:
+==
 1. To start, clone this repository in your terminal. 
 2. This will create the necessary files for the command line interface
 3. To run the project use the run.py file
@@ -45,11 +48,13 @@ $ python3 run.py -c 4 -r 4 -d dictionary.txt -e output.html -m 2 -k 4
 
 
 ##Tests:
+==
 To test this, simply follow the instructions for how to run the project
 
 
 ##Organization:
+==
 This is the README file in the main branch of Wil Sprouse’s 422-proj2 repository. The README, and the src folder are in the home directory. The src directory contains all the code.
 
-##In the wiki are the following categories describing the process of building this project: Team roles, Coding parts delegated, meeting notes, developer logs.
+In the wiki are the following categories describing the process of building this project: Team roles, Coding parts delegated, meeting notes, developer logs.
 
