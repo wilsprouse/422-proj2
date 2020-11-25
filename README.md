@@ -30,17 +30,17 @@ Build, deployment and run process:
 2. This will create the necessary files for the command line interface
 3. To run the project use the run.py file
    - When running the project there are a number of flags to be used for customization such as:
-     To specify rows use:
+     - To specify rows use:
 	-c <number_of_columns>
-     To specify columns use:
+     - To specify columns use:
 	-r <number_of_rows>
-     To specify a dictionary:
+     - To specify a dictionary:
 	-d <dictionary>
-     To specify an output html file
+     - To specify an output html file
 	-e <export_file_name>
-     To specify a multiplier (the further into the grid, the more words it will choose):
+     - To specify a multiplier (the further into the grid, the more words it will choose):
 	-m <multiplier>
-     To specify a constant (initial number of states the AStar will expand and the multiplier increases that value based on the depth.):
+     - To specify a constant (initial number of states the AStar will expand and the multiplier increases that value based on the depth.):
 	-k <constant>
 
 So creating a crossword with all the flags would wield a command that looks like:
