@@ -45,7 +45,7 @@ Build, deployment and run process:
 
 So creating a crossword with all the flags would wield a command that looks like:
 
-$ python3 run.py -c 4 -r 4 -d dictionary.txt -e output.html -m 2 -k 4
+$ python3 run.py crossword -c 4 -r 4 -d dictionary.txt -e output.html -m 2 -k 4
 
 
 Tests:
